@@ -28,7 +28,7 @@ export function App() {
   const [amount, setAmount] = useState("25.00");
   const [memo, setMemo] = useState("INV-ARC-001");
   const [dueDate, setDueDate] = useState("");
-  const [lookupId, setLookupId] = useState("1");
+  const [lookupId, setLookupId] = useState("");
   const [invoice, setInvoice] = useState<InvoiceView | null>(null);
   const [balance, setBalance] = useState("0.00");
   const [received, setReceived] = useState("0.00");
@@ -122,9 +122,17 @@ export function App() {
       const parsedAmount = ethers.parseUnits(amount || "0", 6);
       const dueTimestamp = dueDate ? Math.floor(new Date(`${dueDate}T23:59:59`).getTime() / 1000) : 0;
       const payerAddress = payer.trim() || ZERO_ADDRESS;
-      const tx = await treasury.createInvoice(payerAddress, parsedAmount, dueTimestamp, ethers.id(memo || "invoice"));
+      const invoiceCode = ethers.hexlify(ethers.randomBytes(32));
+      const tx = await treasury.createInvoice(
+        invoiceCode,
+        payerAddress,
+        parsedAmount,
+        dueTimestamp,
+        ethers.id(memo || "invoice")
+      );
       const receipt = await tx.wait();
-      setStatus(`Invoice created in tx ${shortAddress(receipt.hash)}.`);
+      setLookupId(invoiceCode);
+      setStatus(`Invoice created. Code ${shortAddress(invoiceCode)}. Tx ${shortAddress(receipt.hash)}.`);
       await refreshStats(await signer.getAddress());
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "Create invoice failed.");
@@ -140,12 +148,35 @@ export function App() {
     }
 
     try {
+      if (!ethers.isHexString(lookupId, 32)) {
+        setStatus("Enter a valid invoice code.");
+        return;
+      }
+
       setBusy(true);
       const provider = new ethers.BrowserProvider(window.ethereum!);
       const treasury = new ethers.Contract(INVOICE_CONTRACT_ADDRESS, invoiceAbi, provider);
       const raw = await treasury.getInvoice(lookupId);
+      if (raw.issuer === ZERO_ADDRESS) {
+        setInvoice(null);
+        setStatus("Invoice not found.");
+        return;
+      }
+
+      const viewer = account.toLowerCase();
+      const issuer = String(raw.issuer).toLowerCase();
+      const payerAddress = String(raw.payer).toLowerCase();
+      const isOpenInvoice = payerAddress === ZERO_ADDRESS.toLowerCase();
+      const canViewInvoice = isOpenInvoice || viewer === issuer || viewer === payerAddress;
+
+      if (!canViewInvoice) {
+        setInvoice(null);
+        setStatus("This invoice is restricted to its issuer and payer.");
+        return;
+      }
+
       setInvoice({
-        id: raw.id.toString(),
+        id: raw.id,
         issuer: raw.issuer,
         payer: raw.payer,
         amount: formatUsdc(raw.amount),
@@ -153,7 +184,7 @@ export function App() {
         paidAt: raw.paidAt === 0n ? "Unpaid" : new Date(Number(raw.paidAt) * 1000).toLocaleString(),
         canceled: raw.canceled
       });
-      setStatus(`Loaded invoice #${lookupId}.`);
+      setStatus(`Loaded invoice ${shortAddress(lookupId)}.`);
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "Load invoice failed.");
     } finally {
@@ -179,7 +210,7 @@ export function App() {
 
       const payTx = await treasury.payInvoice(invoice.id);
       await payTx.wait();
-      setStatus(`Invoice #${invoice.id} paid with USDC.`);
+      setStatus(`Invoice ${shortAddress(invoice.id)} paid with USDC.`);
       await loadInvoice();
       await refreshStats(await signer.getAddress());
     } catch (error) {
@@ -190,9 +221,9 @@ export function App() {
   }
 
   function copyPaymentLink() {
-    const url = `${window.location.origin}?invoice=${lookupId}`;
+    const url = `${window.location.origin}?invoice=${encodeURIComponent(lookupId)}`;
     void navigator.clipboard.writeText(url);
-    setStatus("Payment link copied.");
+    setStatus("Private invoice link copied.");
   }
 
   async function draftInvoiceWithAi() {
@@ -365,9 +396,9 @@ export function App() {
             <h2>Collect payment</h2>
           </div>
           <label>
-            Invoice ID
+            Invoice code
             <div className="row">
-              <input value={lookupId} onChange={(event) => setLookupId(event.target.value)} inputMode="numeric" />
+              <input value={lookupId} onChange={(event) => setLookupId(event.target.value.trim())} placeholder="0x..." />
               <button onClick={loadInvoice} disabled={busy} title="Load invoice">
                 <RefreshCw size={16} />
               </button>

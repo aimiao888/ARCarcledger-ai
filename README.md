@@ -9,12 +9,19 @@ Arc is stablecoin-native, so this product treats USDC settlement as the core wor
 ## Core Features
 
 - Create an invoice with amount, optional payer address, memo hash, and due date.
+- Generate a random private invoice code instead of an enumerable numeric ID.
 - Draft invoice fields from natural language with an AI assistant.
 - Pay open invoices with Arc testnet USDC.
 - Restrict invoices to a named payer when needed.
 - Track total received, total paid, and total settled volume.
 - Generate treasury summaries and payment reminder copy.
 - Frontend wallet flow for adding Arc Testnet and interacting with the contract.
+
+## Privacy Model
+
+ArcLedger uses a random `bytes32` invoice code for lookup, so invoices are not easy to enumerate like `1`, `2`, or `3`. If a payer address is set, the frontend only displays invoice details to the issuer or that payer.
+
+This is not full cryptographic privacy. Public blockchain storage and transaction calldata can still be inspected by advanced users. For production privacy, invoice metadata should be encrypted off-chain and the contract should store only commitments plus the minimum settlement data needed for payment.
 
 ## Tech Stack
 

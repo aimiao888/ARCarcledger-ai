@@ -7,7 +7,7 @@ interface IERC20 {
 
 contract ArcInvoiceTreasury {
     struct Invoice {
-        uint256 id;
+        bytes32 id;
         address issuer;
         address payer;
         uint256 amount;
@@ -19,23 +19,22 @@ contract ArcInvoiceTreasury {
     }
 
     IERC20 public immutable usdc;
-    uint256 public nextInvoiceId = 1;
     uint256 public totalSettled;
 
-    mapping(uint256 => Invoice) public invoices;
+    mapping(bytes32 => Invoice) public invoices;
     mapping(address => uint256) public totalReceived;
     mapping(address => uint256) public totalPaid;
 
     event InvoiceCreated(
-        uint256 indexed invoiceId,
+        bytes32 indexed invoiceId,
         address indexed issuer,
         address indexed payer,
         uint256 amount,
         uint64 dueDate,
         bytes32 memoHash
     );
-    event InvoicePaid(uint256 indexed invoiceId, address indexed payer, address indexed issuer, uint256 amount);
-    event InvoiceCanceled(uint256 indexed invoiceId);
+    event InvoicePaid(bytes32 indexed invoiceId, address indexed payer, address indexed issuer, uint256 amount);
+    event InvoiceCanceled(bytes32 indexed invoiceId);
 
     constructor(address usdcAddress) {
         require(usdcAddress != address(0), "USDC address required");
@@ -43,15 +42,17 @@ contract ArcInvoiceTreasury {
     }
 
     function createInvoice(
+        bytes32 invoiceId,
         address payer,
         uint256 amount,
         uint64 dueDate,
         bytes32 memoHash
-    ) external returns (uint256 invoiceId) {
+    ) external {
+        require(invoiceId != bytes32(0), "Invoice ID required");
+        require(invoices[invoiceId].issuer == address(0), "Invoice ID exists");
         require(amount > 0, "Amount required");
         require(dueDate == 0 || dueDate > block.timestamp, "Due date must be future");
 
-        invoiceId = nextInvoiceId++;
         invoices[invoiceId] = Invoice({
             id: invoiceId,
             issuer: msg.sender,
@@ -67,7 +68,7 @@ contract ArcInvoiceTreasury {
         emit InvoiceCreated(invoiceId, msg.sender, payer, amount, dueDate, memoHash);
     }
 
-    function cancelInvoice(uint256 invoiceId) external {
+    function cancelInvoice(bytes32 invoiceId) external {
         Invoice storage invoice = invoices[invoiceId];
         require(invoice.issuer != address(0), "Invoice not found");
         require(msg.sender == invoice.issuer, "Only issuer");
@@ -78,7 +79,7 @@ contract ArcInvoiceTreasury {
         emit InvoiceCanceled(invoiceId);
     }
 
-    function payInvoice(uint256 invoiceId) external {
+    function payInvoice(bytes32 invoiceId) external {
         Invoice storage invoice = invoices[invoiceId];
         require(invoice.issuer != address(0), "Invoice not found");
         require(invoice.paidAt == 0, "Already paid");
@@ -96,7 +97,7 @@ contract ArcInvoiceTreasury {
         emit InvoicePaid(invoiceId, msg.sender, invoice.issuer, invoice.amount);
     }
 
-    function getInvoice(uint256 invoiceId) external view returns (Invoice memory) {
+    function getInvoice(bytes32 invoiceId) external view returns (Invoice memory) {
         return invoices[invoiceId];
     }
 }
