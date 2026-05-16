@@ -297,13 +297,21 @@ h2 {
   display: grid;
   grid-template-columns: minmax(320px, 0.9fr) minmax(360px, 1.1fr);
   gap: 16px;
-  align-items: start;
+  align-items: stretch;
 }
 
 .panel {
   display: grid;
   gap: 16px;
   padding: 18px;
+}
+
+.workspace > .panel {
+  height: 100%;
+}
+
+.workspace > section.panel {
+  grid-template-rows: auto auto 1fr auto auto;
 }
 
 .panelTitle,
@@ -358,7 +366,7 @@ h2 {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
-  min-height: 210px;
+  min-height: 280px;
   border: 1px solid #d8e1da;
   border-radius: 8px;
   padding: 14px;
