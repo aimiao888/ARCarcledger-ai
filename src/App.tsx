@@ -1,6 +1,18 @@
 import { useMemo, useState } from "react";
 import { ethers } from "ethers";
-import { Banknote, Bot, Check, Copy, FilePlus2, ReceiptText, RefreshCw, Send, Wallet } from "lucide-react";
+import {
+  Banknote,
+  Bot,
+  Check,
+  Copy,
+  FilePlus2,
+  Landmark,
+  ReceiptText,
+  RefreshCw,
+  Send,
+  ShieldCheck,
+  Wallet
+} from "lucide-react";
 import { generateInvoiceDraft, generateReminder, generateTreasurySummary } from "./ai";
 import { formatUsdc, shortAddress, ZERO_ADDRESS } from "./format";
 import type { InvoiceView } from "./types";
@@ -297,9 +309,10 @@ export function App() {
   return (
     <main className="shell">
       <header className="topbar">
-        <div>
+        <div className="brandBlock">
           <p className="eyebrow">Arc Testnet</p>
           <h1>ArcLedger AI</h1>
+          <p>Private-code USDC invoices and treasury settlement for Arc builders.</p>
         </div>
         <div className="walletControl">
           <button
@@ -320,7 +333,10 @@ export function App() {
       </header>
 
       <section className="status" aria-live="polite">
-        <span>{status}</span>
+        <div>
+          <span className="statusLabel">Status</span>
+          <strong>{status}</strong>
+        </div>
         <button onClick={() => refreshStats()} disabled={!account || busy} title="Refresh balances">
           <RefreshCw size={16} />
         </button>
@@ -334,18 +350,30 @@ export function App() {
 
       <section className="metrics">
         <article>
+          <div className="metricIcon">
+            <Wallet size={18} />
+          </div>
           <span>Wallet USDC</span>
           <strong>{balance}</strong>
         </article>
         <article>
+          <div className="metricIcon">
+            <Landmark size={18} />
+          </div>
           <span>Received</span>
           <strong>{received}</strong>
         </article>
         <article>
+          <div className="metricIcon">
+            <Banknote size={18} />
+          </div>
           <span>Paid</span>
           <strong>{paid}</strong>
         </article>
         <article>
+          <div className="metricIcon">
+            <ShieldCheck size={18} />
+          </div>
           <span>Network Settled</span>
           <strong>{settled}</strong>
         </article>
@@ -359,7 +387,11 @@ export function App() {
           </div>
           <label>
             Natural language
-            <textarea value={aiPrompt} onChange={(event) => setAiPrompt(event.target.value)} />
+            <textarea
+              value={aiPrompt}
+              onChange={(event) => setAiPrompt(event.target.value)}
+              placeholder="Invoice 125 USDC for product design work due in 7 days"
+            />
           </label>
           <button className="secondary wide" onClick={draftInvoiceWithAi} disabled={busy}>
             <Bot size={18} />
@@ -398,7 +430,12 @@ export function App() {
           <label>
             Invoice code
             <div className="row">
-              <input value={lookupId} onChange={(event) => setLookupId(event.target.value.trim())} placeholder="0x..." />
+              <input
+                className="codeInput"
+                value={lookupId}
+                onChange={(event) => setLookupId(event.target.value.trim())}
+                placeholder="0x..."
+              />
               <button onClick={loadInvoice} disabled={busy} title="Load invoice">
                 <RefreshCw size={16} />
               </button>
@@ -447,6 +484,7 @@ export function App() {
           </button>
           {contractLink && (
             <a className="explorer" href={contractLink} target="_blank" rel="noreferrer">
+              <ShieldCheck size={16} />
               View contract on ArcScan
             </a>
           )}

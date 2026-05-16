@@ -1,6 +1,6 @@
 :root {
-  color: #17201b;
-  background: #f4f6f2;
+  color: #111816;
+  background: #eef2ef;
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -27,11 +27,20 @@ button {
   justify-content: center;
   gap: 8px;
   min-height: 42px;
-  border: 1px solid #c6d0c5;
+  border: 1px solid #bdc9c0;
   border-radius: 8px;
   background: #ffffff;
-  color: #17201b;
+  color: #111816;
   cursor: pointer;
+  transition:
+    background 140ms ease,
+    border-color 140ms ease,
+    transform 140ms ease;
+}
+
+button:hover:not(:disabled) {
+  border-color: #8ca092;
+  transform: translateY(-1px);
 }
 
 button:disabled {
@@ -39,41 +48,47 @@ button:disabled {
   opacity: 0.55;
 }
 
-input {
+input,
+textarea {
   width: 100%;
-  min-height: 44px;
-  border: 1px solid #c6d0c5;
+  border: 1px solid #bdc9c0;
   border-radius: 8px;
-  padding: 0 12px;
   background: #ffffff;
-  color: #17201b;
+  color: #111816;
+  outline: none;
+}
+
+input {
+  min-height: 44px;
+  padding: 0 12px;
 }
 
 textarea {
-  width: 100%;
   min-height: 96px;
   resize: vertical;
-  border: 1px solid #c6d0c5;
-  border-radius: 8px;
   padding: 12px;
-  background: #ffffff;
-  color: #17201b;
   line-height: 1.45;
+}
+
+input:focus,
+textarea:focus {
+  border-color: #236d4f;
+  box-shadow: 0 0 0 3px rgb(35 109 79 / 12%);
 }
 
 label {
   display: grid;
   gap: 8px;
-  color: #536057;
+  color: #4c5b53;
   font-size: 13px;
-  font-weight: 650;
+  font-weight: 720;
 }
 
 code {
   padding: 2px 5px;
   border-radius: 5px;
-  background: #e8ece6;
-  color: #1a3327;
+  background: #e3e8e3;
+  color: #193428;
 }
 
 .shell {
@@ -84,17 +99,30 @@ code {
 
 .topbar {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  gap: 16px;
-  padding: 14px 0 22px;
+  gap: 20px;
+  padding: 14px 0 20px;
+}
+
+.brandBlock {
+  display: grid;
+  gap: 6px;
+}
+
+.brandBlock p:last-child {
+  max-width: 620px;
+  margin: 0;
+  color: #53635a;
+  font-size: 15px;
+  line-height: 1.45;
 }
 
 .eyebrow {
-  margin: 0 0 4px;
-  color: #1a7d54;
+  margin: 0;
+  color: #127b50;
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 850;
   letter-spacing: 0;
   text-transform: uppercase;
 }
@@ -106,23 +134,43 @@ h2 {
 }
 
 h1 {
-  font-size: clamp(30px, 5vw, 52px);
-  line-height: 1;
+  font-size: clamp(36px, 5vw, 58px);
+  line-height: 0.95;
 }
 
 h2 {
-  font-size: 18px;
+  font-size: 19px;
 }
 
-.primary {
-  border-color: #14241c;
-  background: #14241c;
+.primary,
+.secondary {
   color: #ffffff;
   padding: 0 18px;
 }
 
+.primary {
+  border-color: #10231a;
+  background: #10231a;
+}
+
+.secondary {
+  border-color: #1f6a4a;
+  background: #1f6a4a;
+}
+
+.primary:hover:not(:disabled),
+.secondary:hover:not(:disabled) {
+  border-color: #0f2f22;
+  background: #174c37;
+}
+
+.wide {
+  width: 100%;
+}
+
 .walletControl {
   position: relative;
+  flex: 0 0 auto;
 }
 
 .walletMenu {
@@ -133,11 +181,11 @@ h2 {
   display: grid;
   gap: 6px;
   width: 170px;
-  border: 1px solid #d6ddd2;
+  border: 1px solid #d4ddd6;
   border-radius: 8px;
   padding: 8px;
   background: #ffffff;
-  box-shadow: 0 12px 28px rgb(21 32 27 / 12%);
+  box-shadow: 0 18px 40px rgb(20 36 29 / 16%);
 }
 
 .walletMenu button {
@@ -149,18 +197,8 @@ h2 {
 }
 
 .walletMenu button:hover {
-  background: #f4f6f2;
-}
-
-.secondary {
-  border-color: #215f46;
-  background: #215f46;
-  color: #ffffff;
-  padding: 0 18px;
-}
-
-.wide {
-  width: 100%;
+  background: #edf2ee;
+  transform: none;
 }
 
 .status,
@@ -169,18 +207,38 @@ h2 {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  min-height: 54px;
+  min-height: 58px;
   margin-bottom: 16px;
-  border: 1px solid #d6ddd2;
+  border: 1px solid #d3dcd5;
   border-radius: 8px;
   padding: 10px 12px 10px 16px;
   background: #ffffff;
+  box-shadow: 0 1px 0 rgb(18 34 26 / 4%);
+}
+
+.status div {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.statusLabel {
+  color: #6b786f;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.status strong {
+  overflow-wrap: anywhere;
+  font-size: 15px;
+  font-weight: 650;
 }
 
 .notice {
   justify-content: flex-start;
-  background: #fff8e8;
-  color: #64460c;
+  background: #fff8e6;
+  color: #65470b;
 }
 
 .metrics {
@@ -193,33 +251,51 @@ h2 {
 .metrics article,
 .panel,
 .aiPanel {
-  border: 1px solid #d6ddd2;
+  border: 1px solid #d3dcd5;
   border-radius: 8px;
   background: #ffffff;
+  box-shadow: 0 1px 0 rgb(18 34 26 / 4%);
 }
 
 .metrics article {
+  position: relative;
   display: grid;
   gap: 8px;
+  min-height: 104px;
   padding: 16px;
+}
+
+.metricIcon {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid #d8e1da;
+  border-radius: 8px;
+  color: #236d4f;
+  background: #f5f8f5;
 }
 
 .metrics span,
 .invoiceBox span {
-  color: #6a746d;
+  color: #66736b;
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 760;
   text-transform: uppercase;
 }
 
 .metrics strong {
-  font-size: 28px;
+  align-self: end;
+  font-size: 30px;
   line-height: 1;
 }
 
 .workspace {
   display: grid;
-  grid-template-columns: minmax(280px, 0.9fr) minmax(320px, 1.1fr);
+  grid-template-columns: minmax(320px, 0.9fr) minmax(360px, 1.1fr);
   gap: 16px;
   align-items: start;
 }
@@ -238,6 +314,10 @@ h2 {
   gap: 10px;
 }
 
+.panelTitle {
+  color: #0f1915;
+}
+
 .row input {
   min-width: 0;
 }
@@ -247,52 +327,71 @@ h2 {
   flex: 0 0 44px;
 }
 
+.codeInput {
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 13px;
+}
+
 .amountInput {
-  border: 1px solid #c6d0c5;
+  border: 1px solid #bdc9c0;
   border-radius: 8px;
   background: #ffffff;
 }
 
+.amountInput:focus-within {
+  border-color: #236d4f;
+  box-shadow: 0 0 0 3px rgb(35 109 79 / 12%);
+}
+
 .amountInput input {
   border: 0;
+  box-shadow: none;
 }
 
 .amountInput span {
   padding-right: 12px;
-  color: #536057;
-  font-weight: 800;
+  color: #4c5b53;
+  font-weight: 850;
 }
 
 .invoiceBox {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
+  gap: 12px;
   min-height: 210px;
-  border: 1px solid #d6ddd2;
+  border: 1px solid #d8e1da;
   border-radius: 8px;
-  padding: 12px;
-  background: #f9faf8;
+  padding: 14px;
+  background: #f8faf8;
 }
 
 .invoiceBox p {
   grid-column: 1 / -1;
   margin: 0;
-  color: #536057;
+  color: #53635a;
+  line-height: 1.5;
 }
 
 .invoiceBox div {
   display: grid;
   gap: 5px;
   min-width: 0;
+  align-content: start;
 }
 
 .invoiceBox strong {
   overflow-wrap: anywhere;
+  font-size: 16px;
 }
 
 .explorer {
-  color: #1b6d4d;
-  font-weight: 750;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 40px;
+  color: #176344;
+  font-weight: 780;
   text-align: center;
   text-decoration: none;
 }
@@ -317,31 +416,43 @@ h2 {
 
 .aiPanel p {
   grid-column: 1 / -1;
-  min-height: 78px;
+  min-height: 82px;
   margin: 0;
-  border: 1px solid #d6ddd2;
+  border: 1px solid #d8e1da;
   border-radius: 8px;
   padding: 14px;
-  background: #f9faf8;
-  color: #2b372f;
+  background: #f8faf8;
+  color: #25342d;
   line-height: 1.55;
 }
 
-@media (max-width: 820px) {
-  .topbar {
-    align-items: flex-start;
-    flex-direction: column;
+@media (max-width: 900px) {
+  .metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .metrics,
   .workspace {
     grid-template-columns: 1fr;
   }
+}
 
-  .invoiceBox {
-    grid-template-columns: 1fr;
+@media (max-width: 640px) {
+  .shell {
+    width: min(100% - 24px, 1180px);
+    padding-top: 16px;
   }
 
+  .topbar {
+    flex-direction: column;
+  }
+
+  .walletControl,
+  .walletControl .primary {
+    width: 100%;
+  }
+
+  .metrics,
+  .invoiceBox,
   .aiPanel {
     grid-template-columns: 1fr;
   }
