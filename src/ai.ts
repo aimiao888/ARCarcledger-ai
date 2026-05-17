@@ -46,11 +46,15 @@ async function requestAssistant<T>(
   fallback: () => T,
   parse: (text: string) => T | null
 ): Promise<T> {
+  const controller = new AbortController();
+  const timeout = window.setTimeout(() => controller.abort(), 2500);
+
   try {
     const response = await fetch(path, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
+      body: JSON.stringify(payload),
+      signal: controller.signal
     });
 
     if (!response.ok) return fallback();
@@ -61,6 +65,8 @@ async function requestAssistant<T>(
     return parse(data.text) ?? fallback();
   } catch {
     return fallback();
+  } finally {
+    window.clearTimeout(timeout);
   }
 }
 

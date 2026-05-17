@@ -52,11 +52,31 @@ export function App() {
   const [walletMenuOpen, setWalletMenuOpen] = useState(false);
 
   const hasContract = Boolean(INVOICE_CONTRACT_ADDRESS);
+  const readProvider = useMemo(() => new ethers.JsonRpcProvider(ARC_RPC_URL), []);
 
   const contractLink = useMemo(() => {
     if (!hasContract) return "";
     return `${ARC_EXPLORER}/address/${INVOICE_CONTRACT_ADDRESS}`;
   }, [hasContract]);
+
+  const readContracts = useMemo(() => {
+    return {
+      usdc: new ethers.Contract(ARC_USDC_ADDRESS, usdcAbi, readProvider),
+      treasury: hasContract ? new ethers.Contract(INVOICE_CONTRACT_ADDRESS, invoiceAbi, readProvider) : null
+    };
+  }, [hasContract, readProvider]);
+
+  function toInvoiceView(raw: any): InvoiceView {
+    return {
+      id: raw.id,
+      issuer: raw.issuer,
+      payer: raw.payer,
+      amount: formatUsdc(raw.amount),
+      dueDate: raw.dueDate === 0n ? "Open" : new Date(Number(raw.dueDate) * 1000).toLocaleDateString(),
+      paidAt: raw.paidAt === 0n ? "Unpaid" : new Date(Number(raw.paidAt) * 1000).toLocaleString(),
+      canceled: raw.canceled
+    };
+  }
 
   async function getSigner() {
     if (!window.ethereum) throw new Error("No injected wallet found.");
@@ -108,16 +128,23 @@ export function App() {
 
   async function refreshStats(address = account) {
     if (!address) return;
-    const provider = new ethers.BrowserProvider(window.ethereum!);
-    const usdc = new ethers.Contract(ARC_USDC_ADDRESS, usdcAbi, provider);
-    const usdcBalance = await usdc.balanceOf(address);
+    const stats = [readContracts.usdc.balanceOf(address)];
+
+    if (readContracts.treasury) {
+      stats.push(
+        readContracts.treasury.totalReceived(address),
+        readContracts.treasury.totalPaid(address),
+        readContracts.treasury.totalSettled()
+      );
+    }
+
+    const [usdcBalance, totalReceived, totalPaid, totalSettled] = await Promise.all(stats);
     setBalance(formatUsdc(usdcBalance));
 
-    if (hasContract) {
-      const treasury = new ethers.Contract(INVOICE_CONTRACT_ADDRESS, invoiceAbi, provider);
-      setReceived(formatUsdc(await treasury.totalReceived(address)));
-      setPaid(formatUsdc(await treasury.totalPaid(address)));
-      setSettled(formatUsdc(await treasury.totalSettled()));
+    if (readContracts.treasury) {
+      setReceived(formatUsdc(totalReceived));
+      setPaid(formatUsdc(totalPaid));
+      setSettled(formatUsdc(totalSettled));
     }
   }
 
@@ -145,7 +172,6 @@ export function App() {
       const receipt = await tx.wait();
       setLookupId(invoiceCode);
       setStatus(`Invoice created. Code ${shortAddress(invoiceCode)}. Tx ${shortAddress(receipt.hash)}.`);
-      await refreshStats(await signer.getAddress());
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "Create invoice failed.");
     } finally {
@@ -166,8 +192,9 @@ export function App() {
       }
 
       setBusy(true);
-      const provider = new ethers.BrowserProvider(window.ethereum!);
-      const treasury = new ethers.Contract(INVOICE_CONTRACT_ADDRESS, invoiceAbi, provider);
+      const treasury = readContracts.treasury;
+      if (!treasury) throw new Error("Invoice contract is not configured.");
+
       const raw = await treasury.getInvoice(lookupId);
       if (raw.issuer === ZERO_ADDRESS) {
         setInvoice(null);
@@ -187,15 +214,7 @@ export function App() {
         return;
       }
 
-      setInvoice({
-        id: raw.id,
-        issuer: raw.issuer,
-        payer: raw.payer,
-        amount: formatUsdc(raw.amount),
-        dueDate: raw.dueDate === 0n ? "Open" : new Date(Number(raw.dueDate) * 1000).toLocaleDateString(),
-        paidAt: raw.paidAt === 0n ? "Unpaid" : new Date(Number(raw.paidAt) * 1000).toLocaleString(),
-        canceled: raw.canceled
-      });
+      setInvoice(toInvoiceView(raw));
       setStatus(`Loaded invoice ${shortAddress(lookupId)}.`);
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "Load invoice failed.");
@@ -223,8 +242,16 @@ export function App() {
       const payTx = await treasury.payInvoice(invoice.id);
       await payTx.wait();
       setStatus(`Invoice ${shortAddress(invoice.id)} paid with USDC.`);
-      await loadInvoice();
-      await refreshStats(await signer.getAddress());
+      const address = await signer.getAddress();
+      const readTreasury = readContracts.treasury;
+      await Promise.all([
+        readTreasury
+          ? readTreasury.getInvoice(invoice.id).then((raw: any) => {
+              setInvoice(toInvoiceView(raw));
+            })
+          : Promise.resolve(),
+        refreshStats(address)
+      ]);
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "Payment failed.");
     } finally {
