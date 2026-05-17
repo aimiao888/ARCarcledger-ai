@@ -250,6 +250,7 @@ h2 {
 
 .metrics article,
 .panel,
+.historyPanel,
 .aiPanel {
   border: 1px solid #d3dcd5;
   border-radius: 8px;
@@ -404,6 +405,80 @@ h2 {
   text-decoration: none;
 }
 
+.historyPanel {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 14px;
+  margin-top: 16px;
+  padding: 18px;
+}
+
+.historyPanel > button {
+  padding: 0 12px;
+}
+
+.historyList {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 8px;
+}
+
+.historyList p {
+  margin: 0;
+  border: 1px solid #d8e1da;
+  border-radius: 8px;
+  padding: 14px;
+  background: #f8faf8;
+  color: #53635a;
+}
+
+.historyRow {
+  display: grid;
+  grid-template-columns: 120px 80px minmax(120px, 1fr) 92px 100px;
+  gap: 12px;
+  justify-content: stretch;
+  min-height: 48px;
+  border-color: #d8e1da;
+  padding: 0 12px;
+  text-align: left;
+}
+
+.historyRow:hover {
+  background: #f8faf8;
+}
+
+.historyCode {
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 13px;
+}
+
+.historyStatus {
+  justify-self: start;
+  border: 1px solid #ccd8d0;
+  border-radius: 999px;
+  padding: 3px 9px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.historyStatus.paid {
+  border-color: #b9d8c5;
+  background: #e8f5ed;
+  color: #176344;
+}
+
+.historyStatus.unpaid {
+  border-color: #e4d6ac;
+  background: #fff8e6;
+  color: #704e0b;
+}
+
+.historyStatus.canceled {
+  border-color: #e0c0c0;
+  background: #fff0f0;
+  color: #8d2c2c;
+}
+
 .aiPanel {
   display: grid;
   grid-template-columns: 1fr auto;
@@ -439,6 +514,16 @@ h2 {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .historyRow {
+    grid-template-columns: 1fr 70px;
+  }
+
+  .historyRow strong,
+  .historyStatus,
+  .historyRow span:last-child {
+    justify-self: start;
+  }
+
   .workspace {
     grid-template-columns: 1fr;
   }
@@ -461,6 +546,7 @@ h2 {
 
   .metrics,
   .invoiceBox,
+  .historyPanel,
   .aiPanel {
     grid-template-columns: 1fr;
   }

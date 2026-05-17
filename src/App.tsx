@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ethers } from "ethers";
 import {
   Banknote,
@@ -33,6 +33,14 @@ declare global {
   }
 }
 
+type HistoryItem = {
+  id: string;
+  role: "Issued" | "Paid";
+  amount: string;
+  status: string;
+  counterparty: string;
+};
+
 export function App() {
   const [account, setAccount] = useState("");
   const [status, setStatus] = useState("Connect a wallet to create and settle Arc USDC invoices.");
@@ -46,10 +54,13 @@ export function App() {
   const [received, setReceived] = useState("0.00");
   const [paid, setPaid] = useState("0.00");
   const [settled, setSettled] = useState("0.00");
+  const [invoiceHistory, setInvoiceHistory] = useState<HistoryItem[]>([]);
   const [aiPrompt, setAiPrompt] = useState("Invoice 125 USDC for product design work due in 7 days");
   const [aiOutput, setAiOutput] = useState("Assistant output will appear here.");
   const [busy, setBusy] = useState(false);
+  const [historyBusy, setHistoryBusy] = useState(false);
   const [walletMenuOpen, setWalletMenuOpen] = useState(false);
+  const [autoLoadCode, setAutoLoadCode] = useState("");
 
   const hasContract = Boolean(INVOICE_CONTRACT_ADDRESS);
   const readProvider = useMemo(() => new ethers.JsonRpcProvider(ARC_RPC_URL), []);
@@ -77,6 +88,21 @@ export function App() {
       canceled: raw.canceled
     };
   }
+
+  useEffect(() => {
+    const code = new URLSearchParams(window.location.search).get("invoice") || "";
+    if (ethers.isHexString(code, 32)) {
+      setLookupId(code);
+      setAutoLoadCode(code);
+      setStatus("Invoice code detected from payment link.");
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!autoLoadCode || !hasContract) return;
+    void loadInvoice();
+    setAutoLoadCode("");
+  }, [autoLoadCode, hasContract]);
 
   async function getSigner() {
     if (!window.ethereum) throw new Error("No injected wallet found.");
@@ -109,7 +135,7 @@ export function App() {
       setAccount(address);
       setWalletMenuOpen(false);
       setStatus(`Connected ${shortAddress(address)} on Arc Testnet.`);
-      await refreshStats(address);
+      await Promise.all([refreshStats(address), loadHistory(address)]);
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "Wallet connection failed.");
     } finally {
@@ -123,6 +149,7 @@ export function App() {
     setBalance("0.00");
     setReceived("0.00");
     setPaid("0.00");
+    setInvoiceHistory([]);
     setStatus("Wallet disconnected. Connect a wallet to continue.");
   }
 
@@ -256,6 +283,53 @@ export function App() {
       setStatus(error instanceof Error ? error.message : "Payment failed.");
     } finally {
       setBusy(false);
+    }
+  }
+
+  async function loadHistory(address = account) {
+    if (!address || !readContracts.treasury) return;
+
+    try {
+      setHistoryBusy(true);
+      const treasury = readContracts.treasury;
+      const issuedFilter = treasury.filters.InvoiceCreated(null, address);
+      const paidFilter = treasury.filters.InvoicePaid(null, address);
+      const [issuedEvents, paidEvents] = await Promise.all([
+        treasury.queryFilter(issuedFilter, 0, "latest"),
+        treasury.queryFilter(paidFilter, 0, "latest")
+      ]);
+
+      const seen = new Map<string, "Issued" | "Paid">();
+      for (const event of issuedEvents) {
+        const id = (event as ethers.EventLog).args.invoiceId;
+        seen.set(id, "Issued");
+      }
+      for (const event of paidEvents) {
+        const id = (event as ethers.EventLog).args.invoiceId;
+        if (!seen.has(id)) seen.set(id, "Paid");
+      }
+
+      const rows = await Promise.all(
+        [...seen.entries()].slice(-12).reverse().map(async ([id, role]) => {
+          const raw = await treasury.getInvoice(id);
+          const paid = raw.paidAt !== 0n;
+          const canceled = raw.canceled;
+          const counterparty = role === "Issued" ? raw.payer : raw.issuer;
+          return {
+            id,
+            role,
+            amount: `${formatUsdc(raw.amount)} USDC`,
+            status: canceled ? "Canceled" : paid ? "Paid" : "Unpaid",
+            counterparty: counterparty === ZERO_ADDRESS ? "Open" : shortAddress(counterparty)
+          };
+        })
+      );
+
+      setInvoiceHistory(rows);
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : "History load failed.");
+    } finally {
+      setHistoryBusy(false);
     }
   }
 
@@ -516,6 +590,39 @@ export function App() {
             </a>
           )}
         </section>
+      </section>
+
+      <section className="historyPanel">
+        <div className="panelTitle">
+          <ReceiptText size={20} />
+          <h2>Invoice history</h2>
+        </div>
+        <button onClick={() => loadHistory()} disabled={!account || historyBusy} title="Refresh invoice history">
+          <RefreshCw size={16} />
+          Refresh
+        </button>
+        <div className="historyList">
+          {invoiceHistory.length > 0 ? (
+            invoiceHistory.map((item) => (
+              <button
+                className="historyRow"
+                key={`${item.role}-${item.id}`}
+                onClick={() => {
+                  setLookupId(item.id);
+                  setStatus(`Selected invoice ${shortAddress(item.id)}.`);
+                }}
+              >
+                <span className="historyCode">{shortAddress(item.id)}</span>
+                <span>{item.role}</span>
+                <strong>{item.amount}</strong>
+                <span className={`historyStatus ${item.status.toLowerCase()}`}>{item.status}</span>
+                <span>{item.counterparty}</span>
+              </button>
+            ))
+          ) : (
+            <p>{account ? "No invoices found for this wallet yet." : "Connect a wallet to load invoice history."}</p>
+          )}
+        </div>
       </section>
 
       <section className="aiPanel">
