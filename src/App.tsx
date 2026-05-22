@@ -89,6 +89,14 @@ export function App() {
     };
   }
 
+  function buildPaymentLink(invoiceCode: string) {
+    return `${window.location.origin}${window.location.pathname}?invoice=${encodeURIComponent(invoiceCode)}`;
+  }
+
+  async function copyText(value: string) {
+    await navigator.clipboard.writeText(value);
+  }
+
   useEffect(() => {
     const code = new URLSearchParams(window.location.search).get("invoice") || "";
     if (ethers.isHexString(code, 32)) {
@@ -175,6 +183,11 @@ export function App() {
     }
   }
 
+  async function refreshDashboard(address = account) {
+    if (!address) return;
+    await Promise.all([refreshStats(address), loadHistory(address)]);
+  }
+
   async function createInvoice() {
     if (!hasContract) {
       setStatus("Deploy the contract and set VITE_CONTRACT_ADDRESS before creating invoices.");
@@ -189,6 +202,7 @@ export function App() {
       const dueTimestamp = dueDate ? Math.floor(new Date(`${dueDate}T23:59:59`).getTime() / 1000) : 0;
       const payerAddress = payer.trim() || ZERO_ADDRESS;
       const invoiceCode = ethers.hexlify(ethers.randomBytes(32));
+      const issuer = await signer.getAddress();
       const tx = await treasury.createInvoice(
         invoiceCode,
         payerAddress,
@@ -198,7 +212,18 @@ export function App() {
       );
       const receipt = await tx.wait();
       setLookupId(invoiceCode);
-      setStatus(`Invoice created. Code ${shortAddress(invoiceCode)}. Tx ${shortAddress(receipt.hash)}.`);
+      setInvoice({
+        id: invoiceCode,
+        issuer,
+        payer: payerAddress,
+        amount: formatUsdc(parsedAmount),
+        dueDate: dueTimestamp === 0 ? "Open" : new Date(dueTimestamp * 1000).toLocaleDateString(),
+        paidAt: "Unpaid",
+        canceled: false
+      });
+      await copyText(buildPaymentLink(invoiceCode));
+      setStatus(`Invoice created and payment link copied. Tx ${shortAddress(receipt.hash)}.`);
+      void loadHistory(issuer);
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "Create invoice failed.");
     } finally {
@@ -206,14 +231,14 @@ export function App() {
     }
   }
 
-  async function loadInvoice() {
+  async function loadInvoiceByCode(invoiceCode: string) {
     if (!hasContract) {
       setStatus("Set VITE_CONTRACT_ADDRESS to load invoices from Arc.");
       return;
     }
 
     try {
-      if (!ethers.isHexString(lookupId, 32)) {
+      if (!ethers.isHexString(invoiceCode, 32)) {
         setStatus("Enter a valid invoice code.");
         return;
       }
@@ -222,7 +247,7 @@ export function App() {
       const treasury = readContracts.treasury;
       if (!treasury) throw new Error("Invoice contract is not configured.");
 
-      const raw = await treasury.getInvoice(lookupId);
+      const raw = await treasury.getInvoice(invoiceCode);
       if (raw.issuer === ZERO_ADDRESS) {
         setInvoice(null);
         setStatus("Invoice not found.");
@@ -242,12 +267,17 @@ export function App() {
       }
 
       setInvoice(toInvoiceView(raw));
-      setStatus(`Loaded invoice ${shortAddress(lookupId)}.`);
+      setLookupId(invoiceCode);
+      setStatus(`Loaded invoice ${shortAddress(invoiceCode)}.`);
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "Load invoice failed.");
     } finally {
       setBusy(false);
     }
+  }
+
+  async function loadInvoice() {
+    await loadInvoiceByCode(lookupId);
   }
 
   async function payLoadedInvoice() {
@@ -277,7 +307,7 @@ export function App() {
               setInvoice(toInvoiceView(raw));
             })
           : Promise.resolve(),
-        refreshStats(address)
+        refreshDashboard(address)
       ]);
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "Payment failed.");
@@ -334,8 +364,12 @@ export function App() {
   }
 
   function copyPaymentLink() {
-    const url = `${window.location.origin}?invoice=${encodeURIComponent(lookupId)}`;
-    void navigator.clipboard.writeText(url);
+    if (!ethers.isHexString(lookupId, 32)) {
+      setStatus("Create or load an invoice before copying a payment link.");
+      return;
+    }
+
+    void copyText(buildPaymentLink(lookupId));
     setStatus("Private invoice link copied.");
   }
 
@@ -438,7 +472,7 @@ export function App() {
           <span className="statusLabel">Status</span>
           <strong>{status}</strong>
         </div>
-        <button onClick={() => refreshStats()} disabled={!account || busy} title="Refresh balances">
+        <button onClick={() => refreshDashboard()} disabled={!account || busy} title="Refresh dashboard">
           <RefreshCw size={16} />
         </button>
       </section>
@@ -607,10 +641,7 @@ export function App() {
               <button
                 className="historyRow"
                 key={`${item.role}-${item.id}`}
-                onClick={() => {
-                  setLookupId(item.id);
-                  setStatus(`Selected invoice ${shortAddress(item.id)}.`);
-                }}
+                onClick={() => loadInvoiceByCode(item.id)}
               >
                 <span className="historyCode">{shortAddress(item.id)}</span>
                 <span>{item.role}</span>
