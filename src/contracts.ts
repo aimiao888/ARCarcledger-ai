@@ -7,6 +7,27 @@ export const ARC_USDC_ADDRESS =
 export const INVOICE_CONTRACT_ADDRESS = import.meta.env.VITE_CONTRACT_ADDRESS || "";
 export const SWAP_ROUTER_ADDRESS = import.meta.env.VITE_SWAP_ROUTER_ADDRESS || "";
 
+export type TokenConfig = {
+  symbol: string;
+  address: string;
+};
+
+function parseTokenList(): TokenConfig[] {
+  const fallback = [{ symbol: "USDC", address: ARC_USDC_ADDRESS }];
+  const raw = import.meta.env.VITE_TOKEN_LIST;
+  if (!raw) return fallback;
+
+  try {
+    const parsed = JSON.parse(raw) as TokenConfig[];
+    const tokens = parsed.filter((token) => token.symbol && token.address);
+    return tokens.length > 0 ? tokens : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+export const TOKEN_LIST = parseTokenList();
+
 export const usdcAbi = [
   "function approve(address spender,uint256 value) returns (bool)",
   "function allowance(address owner,address spender) view returns (uint256)",
@@ -18,7 +39,8 @@ export const erc20Abi = [
   "function approve(address spender,uint256 value) returns (bool)",
   "function allowance(address owner,address spender) view returns (uint256)",
   "function balanceOf(address owner) view returns (uint256)",
-  "function decimals() view returns (uint8)"
+  "function decimals() view returns (uint8)",
+  "function symbol() view returns (string)"
 ] as const;
 
 export const swapRouterAbi = [

@@ -13,6 +13,7 @@ Arc is stablecoin-native, so this product treats USDC settlement as the core wor
 - Draft invoice fields from natural language with an AI assistant.
 - Pay open invoices with Arc testnet USDC.
 - Swap ERC-20 tokens through a configured Uniswap V2 style router.
+- Detect balances from a configured token list and select wallet-held tokens without typing addresses.
 - Restrict invoices to a named payer when needed.
 - Track total received, total paid, and total settled volume.
 - Generate treasury summaries and payment reminder copy.
@@ -31,6 +32,7 @@ This is not full cryptographic privacy. Public blockchain storage and transactio
 - Arc testnet chain ID: `5042002`
 - Default Arc USDC address: `0x3600000000000000000000000000000000000000`
 - Optional swap router: set `VITE_SWAP_ROUTER_ADDRESS` for a Uniswap V2 style router
+- Optional token selector list: set `VITE_TOKEN_LIST` to a JSON array of token symbols and addresses
 - Frontend: React, Vite, ethers v6
 - Contract tooling: Hardhat
 - AI route: Vite dev middleware proxying `/api/ai/*` to OpenAI Responses API or OpenClaw
@@ -59,6 +61,7 @@ Create `.env` from `.env.example`:
 ARC_PRIVATE_KEY=0xYOUR_DEPLOYER_PRIVATE_KEY
 VITE_USDC_ADDRESS=0x3600000000000000000000000000000000000000
 VITE_SWAP_ROUTER_ADDRESS=0xOPTIONAL_UNISWAP_V2_STYLE_ROUTER
+VITE_TOKEN_LIST=[{"symbol":"USDC","address":"0x3600000000000000000000000000000000000000"}]
 OPENAI_API_KEY=sk-YOUR_OPENAI_API_KEY
 OPENAI_MODEL=gpt-4.1-mini
 AI_PROVIDER=openai
@@ -76,6 +79,8 @@ OPENCLAW_MODEL=default
 ```
 
 The app calls `OPENCLAW_BASE_URL/v1/chat/completions`, so it works with an OpenAI-compatible OpenClaw gateway. If OpenClaw is unavailable, the frontend falls back to local demo logic.
+
+The token selector checks balances only for tokens listed in `VITE_TOKEN_LIST`. Full wallet-wide token discovery requires an indexer or explorer API.
 
 Deploy:
 

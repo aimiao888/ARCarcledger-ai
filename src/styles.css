@@ -578,6 +578,34 @@ h2 {
   background: #f8faf8;
 }
 
+.walletTokenRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.walletTokenRow > span {
+  color: #66736b;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.walletTokenRow button {
+  min-height: 32px;
+  border-color: #d8e1da;
+  border-radius: 999px;
+  padding: 0 10px;
+  background: #ffffff;
+  color: #10231a;
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.walletTokenRow button span {
+  color: #66736b;
+  font-weight: 720;
+}
+
 .aiPanel {
   display: grid;
   grid-template-columns: 1fr auto;

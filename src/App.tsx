@@ -25,6 +25,7 @@ import {
   ARC_USDC_ADDRESS,
   INVOICE_CONTRACT_ADDRESS,
   SWAP_ROUTER_ADDRESS,
+  TOKEN_LIST,
   erc20Abi,
   invoiceAbi,
   swapRouterAbi,
@@ -45,6 +46,12 @@ type HistoryItem = {
   counterparty: string;
 };
 
+type WalletToken = {
+  symbol: string;
+  address: string;
+  balance: string;
+};
+
 export function App() {
   const [account, setAccount] = useState("");
   const [status, setStatus] = useState("Connect a wallet to create and settle Arc USDC invoices.");
@@ -63,6 +70,7 @@ export function App() {
   const [swapTokenOut, setSwapTokenOut] = useState("");
   const [swapAmount, setSwapAmount] = useState("1.00");
   const [swapMinOut, setSwapMinOut] = useState("0");
+  const [walletTokens, setWalletTokens] = useState<WalletToken[]>([]);
   const [aiPrompt, setAiPrompt] = useState("Invoice 125 USDC for product design work due in 7 days");
   const [aiOutput, setAiOutput] = useState("Assistant output will appear here.");
   const [busy, setBusy] = useState(false);
@@ -152,7 +160,7 @@ export function App() {
       setAccount(address);
       setWalletMenuOpen(false);
       setStatus(`Connected ${shortAddress(address)} on Arc Testnet.`);
-      await Promise.all([refreshStats(address), loadHistory(address)]);
+      await Promise.all([refreshStats(address), loadHistory(address), loadWalletTokens(address)]);
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "Wallet connection failed.");
     } finally {
@@ -167,6 +175,7 @@ export function App() {
     setReceived("0.00");
     setPaid("0.00");
     setInvoiceHistory([]);
+    setWalletTokens([]);
     setStatus("Wallet disconnected. Connect a wallet to continue.");
   }
 
@@ -194,7 +203,42 @@ export function App() {
 
   async function refreshDashboard(address = account) {
     if (!address) return;
-    await Promise.all([refreshStats(address), loadHistory(address)]);
+    await Promise.all([refreshStats(address), loadHistory(address), loadWalletTokens(address)]);
+  }
+
+  async function loadWalletTokens(address = account) {
+    if (!address) return;
+
+    const uniqueTokens = new Map(
+      TOKEN_LIST.filter((token) => ethers.isAddress(token.address)).map((token) => [token.address.toLowerCase(), token])
+    );
+
+    const rows = await Promise.all(
+      [...uniqueTokens.values()].map(async (token) => {
+        try {
+          const contract = new ethers.Contract(token.address, erc20Abi, readProvider);
+          const [rawBalance, decimals, symbol] = await Promise.all([
+            contract.balanceOf(address),
+            contract.decimals(),
+            contract.symbol().catch(() => token.symbol)
+          ]);
+
+          if (rawBalance === 0n) return null;
+
+          return {
+            symbol: symbol || token.symbol,
+            address: token.address,
+            balance: Number(ethers.formatUnits(rawBalance, decimals)).toLocaleString(undefined, {
+              maximumFractionDigits: 4
+            })
+          };
+        } catch {
+          return null;
+        }
+      })
+    );
+
+    setWalletTokens(rows.filter(Boolean) as WalletToken[]);
   }
 
   async function createInvoice() {
@@ -754,6 +798,18 @@ export function App() {
                 placeholder="0x..."
               />
             </label>
+            <div className="walletTokenRow">
+              {walletTokens.length > 0 ? (
+                walletTokens.map((token) => (
+                  <button key={`from-${token.address}`} type="button" onClick={() => setSwapTokenIn(token.address)}>
+                    {token.symbol}
+                    <span>{token.balance}</span>
+                  </button>
+                ))
+              ) : (
+                <span>{account ? "No listed token balance found." : "Connect wallet to detect tokens."}</span>
+              )}
+            </div>
           </div>
 
           <button className="swapFlip" type="button" onClick={flipSwapTokens} title="Switch swap direction">
@@ -763,7 +819,7 @@ export function App() {
           <div className="swapAsset">
             <div className="swapAssetTop">
               <span>To</span>
-              <span>Estimated token</span>
+              <span>Select token</span>
             </div>
             <input
               className="swapAmountInput muted"
@@ -781,6 +837,18 @@ export function App() {
                 placeholder="0x..."
               />
             </label>
+            <div className="walletTokenRow">
+              {walletTokens.length > 0 ? (
+                walletTokens.map((token) => (
+                  <button key={`to-${token.address}`} type="button" onClick={() => setSwapTokenOut(token.address)}>
+                    {token.symbol}
+                    <span>{shortAddress(token.address)}</span>
+                  </button>
+                ))
+              ) : (
+                <span>Add tokens to VITE_TOKEN_LIST to enable quick selection.</span>
+              )}
+            </div>
           </div>
         </div>
         <div className="swapMeta">
