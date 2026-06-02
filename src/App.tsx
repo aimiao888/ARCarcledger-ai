@@ -376,6 +376,14 @@ export function App() {
     }
   }
 
+  function flipSwapTokens() {
+    setSwapTokenIn(swapTokenOut);
+    setSwapTokenOut(swapTokenIn);
+    setSwapAmount(swapMinOut === "0" ? "" : swapMinOut);
+    setSwapMinOut("0");
+    setStatus("Swap direction updated. Review amount and minimum out before confirming.");
+  }
+
   async function loadHistory(address = account) {
     if (!address || !readContracts.treasury) return;
 
@@ -717,27 +725,68 @@ export function App() {
       </section>
 
       <section className="swapPanel">
-        <div className="panelTitle">
-          <Repeat2 size={20} />
-          <h2>Token swap</h2>
+        <div className="swapHeader">
+          <div className="panelTitle">
+            <Repeat2 size={20} />
+            <h2>Swap</h2>
+          </div>
+          <span>{hasSwapRouter ? "Router ready" : "Router required"}</span>
         </div>
-        <div className="swapGrid">
-          <label>
-            Token in
-            <input value={swapTokenIn} onChange={(event) => setSwapTokenIn(event.target.value.trim())} placeholder="0x..." />
-          </label>
-          <label>
-            Token out
-            <input value={swapTokenOut} onChange={(event) => setSwapTokenOut(event.target.value.trim())} placeholder="0x..." />
-          </label>
-          <label>
-            Amount in
-            <input value={swapAmount} onChange={(event) => setSwapAmount(event.target.value)} inputMode="decimal" />
-          </label>
-          <label>
-            Minimum out
-            <input value={swapMinOut} onChange={(event) => setSwapMinOut(event.target.value)} inputMode="decimal" />
-          </label>
+        <div className="swapCard">
+          <div className="swapAsset">
+            <div className="swapAssetTop">
+              <span>From</span>
+              <button type="button" onClick={() => setSwapTokenIn(ARC_USDC_ADDRESS)}>USDC</button>
+            </div>
+            <input
+              className="swapAmountInput"
+              value={swapAmount}
+              onChange={(event) => setSwapAmount(event.target.value)}
+              inputMode="decimal"
+              placeholder="0.00"
+            />
+            <label>
+              Token address
+              <input
+                className="codeInput"
+                value={swapTokenIn}
+                onChange={(event) => setSwapTokenIn(event.target.value.trim())}
+                placeholder="0x..."
+              />
+            </label>
+          </div>
+
+          <button className="swapFlip" type="button" onClick={flipSwapTokens} title="Switch swap direction">
+            <Repeat2 size={18} />
+          </button>
+
+          <div className="swapAsset">
+            <div className="swapAssetTop">
+              <span>To</span>
+              <span>Estimated token</span>
+            </div>
+            <input
+              className="swapAmountInput muted"
+              value={swapMinOut}
+              onChange={(event) => setSwapMinOut(event.target.value)}
+              inputMode="decimal"
+              placeholder="0.00"
+            />
+            <label>
+              Token address
+              <input
+                className="codeInput"
+                value={swapTokenOut}
+                onChange={(event) => setSwapTokenOut(event.target.value.trim())}
+                placeholder="0x..."
+              />
+            </label>
+          </div>
+        </div>
+        <div className="swapMeta">
+          <span>Minimum received: {swapMinOut || "0"}</span>
+          <span>Deadline: 15 min</span>
+          <span>Router: {hasSwapRouter ? shortAddress(SWAP_ROUTER_ADDRESS) : "Not configured"}</span>
         </div>
         <button className="primary wide" onClick={executeSwap} disabled={!hasSwapRouter || busy}>
           <Repeat2 size={18} />

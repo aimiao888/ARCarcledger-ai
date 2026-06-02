@@ -487,10 +487,95 @@ h2 {
   padding: 18px;
 }
 
-.swapGrid {
+.swapHeader,
+.swapAssetTop,
+.swapMeta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.swapHeader > span,
+.swapAssetTop span,
+.swapMeta span {
+  color: #66736b;
+  font-size: 12px;
+  font-weight: 760;
+}
+
+.swapCard {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
+  gap: 0;
+  border-radius: 8px;
+}
+
+.swapAsset {
+  display: grid;
+  gap: 12px;
+  border: 1px solid #d8e1da;
+  padding: 14px;
+  background: #f8faf8;
+}
+
+.swapAsset:first-child {
+  border-radius: 8px 8px 0 0;
+}
+
+.swapAsset:last-child {
+  border-radius: 0 0 8px 8px;
+}
+
+.swapAssetTop button {
+  min-height: 30px;
+  border-color: #cdd9d1;
+  padding: 0 10px;
+  background: #ffffff;
+  color: #176344;
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.swapAmountInput {
+  min-height: 58px;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  font-size: 34px;
+  font-weight: 760;
+}
+
+.swapAmountInput:focus {
+  box-shadow: none;
+}
+
+.swapAmountInput.muted {
+  color: #66736b;
+}
+
+.swapFlip {
+  justify-self: center;
+  z-index: 1;
+  width: 42px;
+  height: 42px;
+  min-height: 42px;
+  margin: -8px 0;
+  border: 4px solid #ffffff;
+  border-radius: 999px;
+  background: #10231a;
+  color: #ffffff;
+}
+
+.swapFlip:hover:not(:disabled) {
+  background: #174c37;
+}
+
+.swapMeta {
+  flex-wrap: wrap;
+  border: 1px solid #d8e1da;
+  border-radius: 8px;
+  padding: 10px 12px;
+  background: #f8faf8;
 }
 
 .aiPanel {
@@ -561,7 +646,6 @@ h2 {
   .metrics,
   .invoiceBox,
   .historyPanel,
-  .swapGrid,
   .aiPanel {
     grid-template-columns: 1fr;
   }
