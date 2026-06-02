@@ -5,12 +5,24 @@ export const ARC_EXPLORER = "https://testnet.arcscan.app";
 export const ARC_USDC_ADDRESS =
   import.meta.env.VITE_USDC_ADDRESS || "0x3600000000000000000000000000000000000000";
 export const INVOICE_CONTRACT_ADDRESS = import.meta.env.VITE_CONTRACT_ADDRESS || "";
+export const SWAP_ROUTER_ADDRESS = import.meta.env.VITE_SWAP_ROUTER_ADDRESS || "";
 
 export const usdcAbi = [
   "function approve(address spender,uint256 value) returns (bool)",
   "function allowance(address owner,address spender) view returns (uint256)",
   "function balanceOf(address owner) view returns (uint256)",
   "function decimals() view returns (uint8)"
+] as const;
+
+export const erc20Abi = [
+  "function approve(address spender,uint256 value) returns (bool)",
+  "function allowance(address owner,address spender) view returns (uint256)",
+  "function balanceOf(address owner) view returns (uint256)",
+  "function decimals() view returns (uint8)"
+] as const;
+
+export const swapRouterAbi = [
+  "function swapExactTokensForTokens(uint256 amountIn,uint256 amountOutMin,address[] path,address to,uint256 deadline) returns (uint256[] amounts)"
 ] as const;
 
 export const invoiceAbi = [

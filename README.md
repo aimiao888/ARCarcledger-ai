@@ -12,6 +12,7 @@ Arc is stablecoin-native, so this product treats USDC settlement as the core wor
 - Generate a random private invoice code instead of an enumerable numeric ID.
 - Draft invoice fields from natural language with an AI assistant.
 - Pay open invoices with Arc testnet USDC.
+- Swap ERC-20 tokens through a configured Uniswap V2 style router.
 - Restrict invoices to a named payer when needed.
 - Track total received, total paid, and total settled volume.
 - Generate treasury summaries and payment reminder copy.
@@ -29,6 +30,7 @@ This is not full cryptographic privacy. Public blockchain storage and transactio
 - Arc testnet RPC: `https://rpc.testnet.arc.network`
 - Arc testnet chain ID: `5042002`
 - Default Arc USDC address: `0x3600000000000000000000000000000000000000`
+- Optional swap router: set `VITE_SWAP_ROUTER_ADDRESS` for a Uniswap V2 style router
 - Frontend: React, Vite, ethers v6
 - Contract tooling: Hardhat
 - AI route: Vite dev middleware proxying `/api/ai/*` to OpenAI Responses API or OpenClaw
@@ -56,6 +58,7 @@ Create `.env` from `.env.example`:
 ```env
 ARC_PRIVATE_KEY=0xYOUR_DEPLOYER_PRIVATE_KEY
 VITE_USDC_ADDRESS=0x3600000000000000000000000000000000000000
+VITE_SWAP_ROUTER_ADDRESS=0xOPTIONAL_UNISWAP_V2_STYLE_ROUTER
 OPENAI_API_KEY=sk-YOUR_OPENAI_API_KEY
 OPENAI_MODEL=gpt-4.1-mini
 AI_PROVIDER=openai

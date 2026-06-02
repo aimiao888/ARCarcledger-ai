@@ -9,6 +9,7 @@ import {
   Landmark,
   ReceiptText,
   RefreshCw,
+  Repeat2,
   Send,
   ShieldCheck,
   Wallet
@@ -23,7 +24,10 @@ import {
   ARC_RPC_URL,
   ARC_USDC_ADDRESS,
   INVOICE_CONTRACT_ADDRESS,
+  SWAP_ROUTER_ADDRESS,
+  erc20Abi,
   invoiceAbi,
+  swapRouterAbi,
   usdcAbi
 } from "./contracts";
 
@@ -55,6 +59,10 @@ export function App() {
   const [paid, setPaid] = useState("0.00");
   const [settled, setSettled] = useState("0.00");
   const [invoiceHistory, setInvoiceHistory] = useState<HistoryItem[]>([]);
+  const [swapTokenIn, setSwapTokenIn] = useState(ARC_USDC_ADDRESS);
+  const [swapTokenOut, setSwapTokenOut] = useState("");
+  const [swapAmount, setSwapAmount] = useState("1.00");
+  const [swapMinOut, setSwapMinOut] = useState("0");
   const [aiPrompt, setAiPrompt] = useState("Invoice 125 USDC for product design work due in 7 days");
   const [aiOutput, setAiOutput] = useState("Assistant output will appear here.");
   const [busy, setBusy] = useState(false);
@@ -63,6 +71,7 @@ export function App() {
   const [autoLoadCode, setAutoLoadCode] = useState("");
 
   const hasContract = Boolean(INVOICE_CONTRACT_ADDRESS);
+  const hasSwapRouter = Boolean(SWAP_ROUTER_ADDRESS);
   const readProvider = useMemo(() => new ethers.JsonRpcProvider(ARC_RPC_URL), []);
 
   const contractLink = useMemo(() => {
@@ -311,6 +320,57 @@ export function App() {
       ]);
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "Payment failed.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function executeSwap() {
+    if (!hasSwapRouter) {
+      setStatus("Configure VITE_SWAP_ROUTER_ADDRESS before swapping.");
+      return;
+    }
+
+    if (!ethers.isAddress(swapTokenIn) || !ethers.isAddress(swapTokenOut)) {
+      setStatus("Enter valid token addresses for the swap.");
+      return;
+    }
+
+    try {
+      setBusy(true);
+      const signer = await getSigner();
+      const recipient = await signer.getAddress();
+      const tokenIn = new ethers.Contract(swapTokenIn, erc20Abi, signer);
+      const tokenOut = new ethers.Contract(swapTokenOut, erc20Abi, signer);
+      const router = new ethers.Contract(SWAP_ROUTER_ADDRESS, swapRouterAbi, signer);
+      const [tokenInDecimals, tokenOutDecimals] = await Promise.all([tokenIn.decimals(), tokenOut.decimals()]);
+      const amountIn = ethers.parseUnits(swapAmount || "0", tokenInDecimals);
+      const amountOutMin = ethers.parseUnits(swapMinOut || "0", tokenOutDecimals);
+
+      if (amountIn <= 0n) {
+        setStatus("Enter a swap amount greater than zero.");
+        return;
+      }
+
+      const allowance = await tokenIn.allowance(recipient, SWAP_ROUTER_ADDRESS);
+      if (allowance < amountIn) {
+        const approveTx = await tokenIn.approve(SWAP_ROUTER_ADDRESS, amountIn);
+        await approveTx.wait();
+      }
+
+      const deadline = Math.floor(Date.now() / 1000) + 900;
+      const swapTx = await router.swapExactTokensForTokens(
+        amountIn,
+        amountOutMin,
+        [swapTokenIn, swapTokenOut],
+        recipient,
+        deadline
+      );
+      const receipt = await swapTx.wait();
+      setStatus(`Swap submitted. Tx ${shortAddress(receipt.hash)}.`);
+      await refreshDashboard(recipient);
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : "Swap failed.");
     } finally {
       setBusy(false);
     }
@@ -654,6 +714,35 @@ export function App() {
             <p>{account ? "No invoices found for this wallet yet." : "Connect a wallet to load invoice history."}</p>
           )}
         </div>
+      </section>
+
+      <section className="swapPanel">
+        <div className="panelTitle">
+          <Repeat2 size={20} />
+          <h2>Token swap</h2>
+        </div>
+        <div className="swapGrid">
+          <label>
+            Token in
+            <input value={swapTokenIn} onChange={(event) => setSwapTokenIn(event.target.value.trim())} placeholder="0x..." />
+          </label>
+          <label>
+            Token out
+            <input value={swapTokenOut} onChange={(event) => setSwapTokenOut(event.target.value.trim())} placeholder="0x..." />
+          </label>
+          <label>
+            Amount in
+            <input value={swapAmount} onChange={(event) => setSwapAmount(event.target.value)} inputMode="decimal" />
+          </label>
+          <label>
+            Minimum out
+            <input value={swapMinOut} onChange={(event) => setSwapMinOut(event.target.value)} inputMode="decimal" />
+          </label>
+        </div>
+        <button className="primary wide" onClick={executeSwap} disabled={!hasSwapRouter || busy}>
+          <Repeat2 size={18} />
+          {hasSwapRouter ? "Approve & Swap" : "Router not configured"}
+        </button>
       </section>
 
       <section className="aiPanel">
