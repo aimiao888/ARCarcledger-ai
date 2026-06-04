@@ -557,7 +557,10 @@ export function App() {
     <main className="shell">
       <header className="topbar">
         <div className="brandBlock">
-          <p className="eyebrow">Arc Testnet</p>
+          <div className="brandMark">
+            <span>AL</span>
+            <p className="eyebrow">Arc Testnet</p>
+          </div>
           <h1>ArcLedger AI</h1>
           <p>Private-code USDC invoices and treasury settlement for Arc builders.</p>
         </div>
@@ -596,7 +599,7 @@ export function App() {
       )}
 
       <section className="metrics">
-        <article>
+        <article className="metricPrimary">
           <div className="metricIcon">
             <Wallet size={18} />
           </div>
@@ -774,13 +777,13 @@ export function App() {
             <Repeat2 size={20} />
             <h2>Swap</h2>
           </div>
-          <span>{hasSwapRouter ? "Router ready" : "Router required"}</span>
+          <span className={hasSwapRouter ? "routerPill ready" : "routerPill"}>{hasSwapRouter ? "Router ready" : "Router required"}</span>
         </div>
         <div className="swapCard">
           <div className="swapAsset">
             <div className="swapAssetTop">
               <span>From</span>
-              <button type="button" onClick={() => setSwapTokenIn(ARC_USDC_ADDRESS)}>USDC</button>
+              <button className="tokenSelect" type="button" onClick={() => setSwapTokenIn(ARC_USDC_ADDRESS)}>USDC</button>
             </div>
             <input
               className="swapAmountInput"
@@ -819,7 +822,7 @@ export function App() {
           <div className="swapAsset">
             <div className="swapAssetTop">
               <span>To</span>
-              <span>Select token</span>
+              <span className="tokenSelect ghost">Select token</span>
             </div>
             <input
               className="swapAmountInput muted"

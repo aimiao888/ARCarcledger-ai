@@ -1,6 +1,6 @@
 :root {
-  color: #111816;
-  background: #eef2ef;
+  color: #111513;
+  background: #f2f4f1;
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -27,10 +27,10 @@ button {
   justify-content: center;
   gap: 8px;
   min-height: 42px;
-  border: 1px solid #bdc9c0;
+  border: 1px solid #cfd6d0;
   border-radius: 8px;
   background: #ffffff;
-  color: #111816;
+  color: #111513;
   cursor: pointer;
   transition:
     background 140ms ease,
@@ -39,7 +39,7 @@ button {
 }
 
 button:hover:not(:disabled) {
-  border-color: #8ca092;
+  border-color: #9ba89e;
   transform: translateY(-1px);
 }
 
@@ -51,10 +51,10 @@ button:disabled {
 input,
 textarea {
   width: 100%;
-  border: 1px solid #bdc9c0;
+  border: 1px solid #cfd6d0;
   border-radius: 8px;
   background: #ffffff;
-  color: #111816;
+  color: #111513;
   outline: none;
 }
 
@@ -64,7 +64,7 @@ input {
 }
 
 textarea {
-  min-height: 96px;
+  min-height: 92px;
   resize: vertical;
   padding: 12px;
   line-height: 1.45;
@@ -72,14 +72,14 @@ textarea {
 
 input:focus,
 textarea:focus {
-  border-color: #236d4f;
-  box-shadow: 0 0 0 3px rgb(35 109 79 / 12%);
+  border-color: #111513;
+  box-shadow: 0 0 0 3px rgb(17 21 19 / 10%);
 }
 
 label {
   display: grid;
   gap: 8px;
-  color: #4c5b53;
+  color: #4e5a52;
   font-size: 13px;
   font-weight: 720;
 }
@@ -87,14 +87,14 @@ label {
 code {
   padding: 2px 5px;
   border-radius: 5px;
-  background: #e3e8e3;
-  color: #193428;
+  background: #e5e9e5;
+  color: #17241d;
 }
 
 .shell {
   width: min(1180px, calc(100% - 32px));
   margin: 0 auto;
-  padding: 24px 0 40px;
+  padding: 22px 0 40px;
 }
 
 .topbar {
@@ -102,25 +102,43 @@ code {
   align-items: flex-start;
   justify-content: space-between;
   gap: 20px;
-  padding: 14px 0 20px;
+  padding: 8px 0 18px;
 }
 
 .brandBlock {
   display: grid;
-  gap: 6px;
+  gap: 8px;
+}
+
+.brandMark {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brandMark span {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: #111513;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 900;
 }
 
 .brandBlock p:last-child {
   max-width: 620px;
   margin: 0;
-  color: #53635a;
-  font-size: 15px;
+  color: #657169;
+  font-size: 14px;
   line-height: 1.45;
 }
 
 .eyebrow {
   margin: 0;
-  color: #127b50;
+  color: #0f7b51;
   font-size: 12px;
   font-weight: 850;
   letter-spacing: 0;
@@ -134,12 +152,12 @@ h2 {
 }
 
 h1 {
-  font-size: clamp(36px, 5vw, 58px);
-  line-height: 0.95;
+  font-size: clamp(34px, 4.5vw, 54px);
+  line-height: 0.98;
 }
 
 h2 {
-  font-size: 19px;
+  font-size: 18px;
 }
 
 .primary,
@@ -149,19 +167,19 @@ h2 {
 }
 
 .primary {
-  border-color: #10231a;
-  background: #10231a;
+  border-color: #111513;
+  background: #111513;
 }
 
 .secondary {
-  border-color: #1f6a4a;
-  background: #1f6a4a;
+  border-color: #12784f;
+  background: #12784f;
 }
 
 .primary:hover:not(:disabled),
 .secondary:hover:not(:disabled) {
-  border-color: #0f2f22;
-  background: #174c37;
+  border-color: #202823;
+  background: #202823;
 }
 
 .wide {
@@ -173,6 +191,12 @@ h2 {
   flex: 0 0 auto;
 }
 
+.walletControl > .primary {
+  min-width: 166px;
+  min-height: 48px;
+  box-shadow: 0 10px 24px rgb(17 21 19 / 12%);
+}
+
 .walletMenu {
   position: absolute;
   top: calc(100% + 8px);
@@ -180,12 +204,12 @@ h2 {
   z-index: 20;
   display: grid;
   gap: 6px;
-  width: 170px;
-  border: 1px solid #d4ddd6;
+  width: 174px;
+  border: 1px solid #d7ddd8;
   border-radius: 8px;
   padding: 8px;
   background: #ffffff;
-  box-shadow: 0 18px 40px rgb(20 36 29 / 16%);
+  box-shadow: 0 18px 40px rgb(17 21 19 / 16%);
 }
 
 .walletMenu button {
@@ -197,7 +221,7 @@ h2 {
 }
 
 .walletMenu button:hover {
-  background: #edf2ee;
+  background: #f0f3f0;
   transform: none;
 }
 
@@ -208,12 +232,12 @@ h2 {
   justify-content: space-between;
   gap: 12px;
   min-height: 58px;
-  margin-bottom: 16px;
-  border: 1px solid #d3dcd5;
+  margin-bottom: 14px;
+  border: 1px solid #d8ded9;
   border-radius: 8px;
   padding: 10px 12px 10px 16px;
   background: #ffffff;
-  box-shadow: 0 1px 0 rgb(18 34 26 / 4%);
+  box-shadow: 0 1px 0 rgb(17 21 19 / 4%);
 }
 
 .status div {
@@ -223,7 +247,7 @@ h2 {
 }
 
 .statusLabel {
-  color: #6b786f;
+  color: #6e7971;
   font-size: 11px;
   font-weight: 800;
   text-transform: uppercase;
@@ -237,13 +261,13 @@ h2 {
 
 .notice {
   justify-content: flex-start;
-  background: #fff8e6;
-  color: #65470b;
+  background: #fff7e3;
+  color: #684809;
 }
 
 .metrics {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: 1.15fr repeat(3, minmax(0, 1fr));
   gap: 12px;
   margin-bottom: 16px;
 }
@@ -253,18 +277,25 @@ h2 {
 .historyPanel,
 .swapPanel,
 .aiPanel {
-  border: 1px solid #d3dcd5;
+  border: 1px solid #d8ded9;
   border-radius: 8px;
   background: #ffffff;
-  box-shadow: 0 1px 0 rgb(18 34 26 / 4%);
+  box-shadow: 0 1px 0 rgb(17 21 19 / 4%);
 }
 
 .metrics article {
   position: relative;
   display: grid;
   gap: 8px;
-  min-height: 104px;
+  min-height: 108px;
   padding: 16px;
+  overflow: hidden;
+}
+
+.metrics .metricPrimary {
+  border-color: #111513;
+  background: #111513;
+  color: #ffffff;
 }
 
 .metricIcon {
@@ -275,18 +306,28 @@ h2 {
   place-items: center;
   width: 34px;
   height: 34px;
-  border: 1px solid #d8e1da;
+  border: 1px solid #dce2dd;
   border-radius: 8px;
-  color: #236d4f;
-  background: #f5f8f5;
+  color: #12784f;
+  background: #f6f8f6;
+}
+
+.metricPrimary .metricIcon {
+  border-color: rgb(255 255 255 / 18%);
+  color: #ffffff;
+  background: rgb(255 255 255 / 10%);
 }
 
 .metrics span,
 .invoiceBox span {
-  color: #66736b;
+  color: #69736c;
   font-size: 12px;
   font-weight: 760;
   text-transform: uppercase;
+}
+
+.metricPrimary span {
+  color: rgb(255 255 255 / 70%);
 }
 
 .metrics strong {
@@ -297,7 +338,7 @@ h2 {
 
 .workspace {
   display: grid;
-  grid-template-columns: minmax(320px, 0.9fr) minmax(360px, 1.1fr);
+  grid-template-columns: minmax(320px, 0.95fr) minmax(360px, 1.05fr);
   gap: 16px;
   align-items: stretch;
 }
@@ -325,7 +366,11 @@ h2 {
 }
 
 .panelTitle {
-  color: #0f1915;
+  color: #111513;
+}
+
+.panelTitle svg {
+  color: #12784f;
 }
 
 .row input {
@@ -343,14 +388,14 @@ h2 {
 }
 
 .amountInput {
-  border: 1px solid #bdc9c0;
+  border: 1px solid #cfd6d0;
   border-radius: 8px;
   background: #ffffff;
 }
 
 .amountInput:focus-within {
-  border-color: #236d4f;
-  box-shadow: 0 0 0 3px rgb(35 109 79 / 12%);
+  border-color: #111513;
+  box-shadow: 0 0 0 3px rgb(17 21 19 / 10%);
 }
 
 .amountInput input {
@@ -360,7 +405,7 @@ h2 {
 
 .amountInput span {
   padding-right: 12px;
-  color: #4c5b53;
+  color: #4d5851;
   font-weight: 850;
 }
 
@@ -368,17 +413,17 @@ h2 {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
-  min-height: 280px;
-  border: 1px solid #d8e1da;
+  min-height: 266px;
+  border: 1px solid #e0e5e1;
   border-radius: 8px;
   padding: 14px;
-  background: #f8faf8;
+  background: #f7f9f7;
 }
 
 .invoiceBox p {
   grid-column: 1 / -1;
   margin: 0;
-  color: #53635a;
+  color: #59645d;
   line-height: 1.5;
 }
 
@@ -400,7 +445,7 @@ h2 {
   justify-content: center;
   gap: 8px;
   min-height: 40px;
-  color: #176344;
+  color: #0e7049;
   font-weight: 780;
   text-align: center;
   text-decoration: none;
@@ -426,11 +471,11 @@ h2 {
 
 .historyList p {
   margin: 0;
-  border: 1px solid #d8e1da;
+  border: 1px solid #e0e5e1;
   border-radius: 8px;
   padding: 14px;
-  background: #f8faf8;
-  color: #53635a;
+  background: #f7f9f7;
+  color: #59645d;
 }
 
 .historyRow {
@@ -439,13 +484,13 @@ h2 {
   gap: 12px;
   justify-content: stretch;
   min-height: 48px;
-  border-color: #d8e1da;
+  border-color: #e0e5e1;
   padding: 0 12px;
   text-align: left;
 }
 
 .historyRow:hover {
-  background: #f8faf8;
+  background: #f7f9f7;
 }
 
 .historyCode {
@@ -455,7 +500,7 @@ h2 {
 
 .historyStatus {
   justify-self: start;
-  border: 1px solid #ccd8d0;
+  border: 1px solid #d4dcd5;
   border-radius: 999px;
   padding: 3px 9px;
   font-size: 12px;
@@ -463,21 +508,21 @@ h2 {
 }
 
 .historyStatus.paid {
-  border-color: #b9d8c5;
-  background: #e8f5ed;
-  color: #176344;
+  border-color: #b8dcc6;
+  background: #e6f5ec;
+  color: #0e7049;
 }
 
 .historyStatus.unpaid {
-  border-color: #e4d6ac;
-  background: #fff8e6;
+  border-color: #e4d4a7;
+  background: #fff7e3;
   color: #704e0b;
 }
 
 .historyStatus.canceled {
-  border-color: #e0c0c0;
+  border-color: #e1c0c0;
   background: #fff0f0;
-  color: #8d2c2c;
+  color: #8c2929;
 }
 
 .swapPanel {
@@ -485,6 +530,9 @@ h2 {
   gap: 14px;
   margin-top: 16px;
   padding: 18px;
+  border-color: #111513;
+  background: #111513;
+  color: #ffffff;
 }
 
 .swapHeader,
@@ -496,12 +544,30 @@ h2 {
   gap: 12px;
 }
 
-.swapHeader > span,
-.swapAssetTop span,
-.swapMeta span {
-  color: #66736b;
+.swapPanel .panelTitle {
+  color: #ffffff;
+}
+
+.swapPanel .panelTitle svg {
+  color: #ffffff;
+}
+
+.routerPill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  border: 1px solid rgb(255 255 255 / 16%);
+  border-radius: 999px;
+  padding: 0 10px;
+  color: rgb(255 255 255 / 66%);
   font-size: 12px;
-  font-weight: 760;
+  font-weight: 780;
+}
+
+.routerPill.ready {
+  border-color: rgb(39 204 125 / 26%);
+  background: rgb(39 204 125 / 12%);
+  color: #74dfa8;
 }
 
 .swapCard {
@@ -513,9 +579,9 @@ h2 {
 .swapAsset {
   display: grid;
   gap: 12px;
-  border: 1px solid #d8e1da;
+  border: 1px solid rgb(255 255 255 / 10%);
   padding: 14px;
-  background: #f8faf8;
+  background: #1c211e;
 }
 
 .swapAsset:first-child {
@@ -526,14 +592,31 @@ h2 {
   border-radius: 0 0 8px 8px;
 }
 
-.swapAssetTop button {
-  min-height: 30px;
-  border-color: #cdd9d1;
-  padding: 0 10px;
-  background: #ffffff;
-  color: #176344;
+.swapAssetTop span,
+.swapMeta span {
+  color: rgb(255 255 255 / 58%);
   font-size: 12px;
-  font-weight: 850;
+  font-weight: 760;
+}
+
+.tokenSelect,
+.swapAssetTop .tokenSelect {
+  min-height: 32px;
+  border-color: rgb(255 255 255 / 14%);
+  border-radius: 999px;
+  padding: 0 12px;
+  background: #ffffff;
+  color: #111513;
+  font-size: 12px;
+  font-weight: 880;
+}
+
+.tokenSelect.ghost {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid rgb(255 255 255 / 14%);
+  background: rgb(255 255 255 / 8%);
+  color: rgb(255 255 255 / 70%);
 }
 
 .swapAmountInput {
@@ -541,6 +624,7 @@ h2 {
   border: 0;
   padding: 0;
   background: transparent;
+  color: #ffffff;
   font-size: 34px;
   font-weight: 760;
 }
@@ -550,7 +634,22 @@ h2 {
 }
 
 .swapAmountInput.muted {
-  color: #66736b;
+  color: rgb(255 255 255 / 58%);
+}
+
+.swapAsset label {
+  color: rgb(255 255 255 / 62%);
+}
+
+.swapAsset input.codeInput {
+  border-color: rgb(255 255 255 / 12%);
+  background: #141816;
+  color: #ffffff;
+}
+
+.swapAsset input.codeInput:focus {
+  border-color: #ffffff;
+  box-shadow: 0 0 0 3px rgb(255 255 255 / 8%);
 }
 
 .swapFlip {
@@ -560,22 +659,34 @@ h2 {
   height: 42px;
   min-height: 42px;
   margin: -8px 0;
-  border: 4px solid #ffffff;
+  border: 4px solid #111513;
   border-radius: 999px;
-  background: #10231a;
-  color: #ffffff;
+  background: #ffffff;
+  color: #111513;
 }
 
 .swapFlip:hover:not(:disabled) {
-  background: #174c37;
+  border-color: #111513;
+  background: #e8eee9;
 }
 
 .swapMeta {
   flex-wrap: wrap;
-  border: 1px solid #d8e1da;
+  border: 1px solid rgb(255 255 255 / 10%);
   border-radius: 8px;
   padding: 10px 12px;
-  background: #f8faf8;
+  background: #1c211e;
+}
+
+.swapPanel .primary {
+  border-color: #ffffff;
+  background: #ffffff;
+  color: #111513;
+}
+
+.swapPanel .primary:hover:not(:disabled) {
+  border-color: #dfe6e1;
+  background: #dfe6e1;
 }
 
 .walletTokenRow {
@@ -585,24 +696,24 @@ h2 {
 }
 
 .walletTokenRow > span {
-  color: #66736b;
+  color: rgb(255 255 255 / 58%);
   font-size: 12px;
   font-weight: 650;
 }
 
 .walletTokenRow button {
   min-height: 32px;
-  border-color: #d8e1da;
+  border-color: rgb(255 255 255 / 12%);
   border-radius: 999px;
   padding: 0 10px;
-  background: #ffffff;
-  color: #10231a;
+  background: rgb(255 255 255 / 8%);
+  color: #ffffff;
   font-size: 12px;
   font-weight: 850;
 }
 
 .walletTokenRow button span {
-  color: #66736b;
+  color: rgb(255 255 255 / 58%);
   font-weight: 720;
 }
 
@@ -628,10 +739,10 @@ h2 {
   grid-column: 1 / -1;
   min-height: 82px;
   margin: 0;
-  border: 1px solid #d8e1da;
+  border: 1px solid #e0e5e1;
   border-radius: 8px;
   padding: 14px;
-  background: #f8faf8;
+  background: #f7f9f7;
   color: #25342d;
   line-height: 1.55;
 }
@@ -680,5 +791,9 @@ h2 {
 
   .aiActions {
     flex-wrap: wrap;
+  }
+
+  .swapAmountInput {
+    font-size: 30px;
   }
 }
